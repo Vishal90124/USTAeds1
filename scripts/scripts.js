@@ -11,6 +11,7 @@ import {
   loadCSS,
   buildBlock,
 } from './aem.js';
+import { loadTargetEager } from './target-atjs.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
   const innerTT = window.trustedTypes.createPolicy('tt-inner', {
@@ -161,11 +162,20 @@ export function decorateMain(main) {
  */
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
+  // Kick off Target's decision fetch in parallel with page decoration - await
+  // it before rendering the first (LCP) section, so a personalized decision
+  // is applied before that content ever paints, avoiding a flash of the
+  // default version.
+  const targetPromise = loadTargetEager();
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
+    await targetPromise;
+    // Break up the long task before the LCP block renders (aem.live's
+    // documented at.js pattern).
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 
