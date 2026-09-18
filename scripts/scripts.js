@@ -162,20 +162,15 @@ export function decorateMain(main) {
  */
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
-  // Kick off Target's decision fetch in parallel with page decoration - await
-  // it before rendering the first (LCP) section, so a personalized decision
-  // is applied before that content ever paints, avoiding a flash of the
-  // default version.
-  const targetPromise = loadTargetEager();
+  // at.js (loaded in head.html, bodyHidingEnabled: true) hides <body> itself
+  // and reveals it once a decision arrives or its own timeout elapses - no
+  // manual await/task-break needed here, unlike the deferred-import approach.
+  loadTargetEager();
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
-    await targetPromise;
-    // Break up the long task before the LCP block renders (aem.live's
-    // documented at.js pattern).
-    await new Promise((resolve) => { setTimeout(resolve, 0); });
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 
