@@ -10,8 +10,6 @@
 // https://experienceleague.adobe.com/en/docs/target-learn/tutorials/implementation/understanding-how-atjs-20-works
 // https://experienceleague.adobe.com/en/docs/target-learn/tutorials/implementation/implement-atjs-20-in-a-single-page-application
 
-import { hasConsent } from './consent-check.js';
-
 // TODO: vendor the real at.js bundle from Target's admin console into this
 // repo (e.g. scripts/vendor/at.js) and point this at that local path.
 const AT_JS_PATH = './vendor/at.js';
@@ -49,15 +47,15 @@ function triggerView() {
 }
 
 /**
- * Loads Target's personalization for the current page, gated by consent.
- * Meant to be awaited from loadEager() - Target must resolve early (in
- * parallel with rendering) to avoid a flash of default, un-personalized
- * content once a decision arrives.
+ * Loads Target's personalization for the current page. This site has no
+ * consent-management requirement, so this runs unconditionally. Meant to be
+ * awaited from loadEager() - Target must resolve early (in parallel with
+ * rendering) to avoid a flash of default, un-personalized content once a
+ * decision arrives.
  * @returns {Promise<void>}
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function loadTargetEager() {
-  if (!hasConsent()) return;
   await initATJS(AT_JS_PATH, TARGET_CONFIG);
   triggerView();
 }

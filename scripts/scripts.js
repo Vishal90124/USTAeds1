@@ -214,7 +214,9 @@ async function loadLazy(doc) {
  * without impacting the user experience.
  */
 function loadDelayed() {
-  import('./consent-check.js');
+  // This site has no consent-management requirement, so Analytics loads
+  // unconditionally instead of going through a consent check first.
+  import('./consented.js');
   // load anything that can be postponed to the latest here
 }
 
